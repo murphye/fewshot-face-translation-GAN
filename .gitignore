@@ -1,2 +1,6 @@
 
 *.pyc
+.vscode/settings.json
+.ipynb_checkpoints/odh_demo-checkpoint.ipynb
+weights/encoder.h5
+weights/decoder.h5
