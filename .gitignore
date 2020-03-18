@@ -1,6 +1,6 @@
 
 *.pyc
 .vscode/settings.json
-.ipynb_checkpoints/odh_demo-checkpoint.ipynb
-weights/encoder.h5
-weights/decoder.h5
+.ipynb_checkpoints
+weights
+face_translation_model
