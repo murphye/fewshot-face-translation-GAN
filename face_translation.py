@@ -17,10 +17,16 @@ from face_toolbox_keras.models.parser import face_parser
 from face_toolbox_keras.models.detector import face_detector
 from face_toolbox_keras.models.detector.iris_detector import IrisDetector
 
-src_input = tf.placeholder(tf.uint8, shape=[None, None, 3], name='src') # Source image
-tar_input = tf.placeholder(tf.uint8, shape=[None, None, 3], name='tar') # Target image
+from keras import backend as K
 
+#src_input = tf.placeholder(tf.uint8, shape=[None, None, 3], name='src') # Source image
+#tar_input = tf.placeholder(tf.uint8, shape=[None, None, 3], name='tar') # Target image
 
+#tf.config.experimental_run_functions_eagerly(True)
+
+#tf.compat.v1.disable_v2_behavior()
+
+@tf.function(input_signature=[tf.TensorSpec([], tf.uint8), tf.TensorSpec([], tf.uint8)])
 def face_translation(src_in, tar_in):
 
     fn_src = "images/trump.jpg"
@@ -44,37 +50,45 @@ def face_translation(src_in, tar_in):
     print(">>> Shape: ", result_face_final.shape, result_face_final[0][0].dtype)
 
     return result_face_final
+
+with tf.Graph().as_default():
+    g = tf.Graph();
   
-with tf.Session() as sess:
+    with tf.Session(graph=g) as sess:
+        
+            to_export = tf.Module()
+            to_export.face_translation = face_translation
 
-    final_result = face_translation(src_input, tar_input)
-    result = tf.Variable(final_result)
+            tf.saved_model.save(to_export, "face_translation_model")
 
-    sess.run(tf.global_variables_initializer()) 
+    #final_result = face_translation(src_input, tar_input)
+    #result = tf.Variable(final_result)
+
+    #sess.run(tf.global_variables_initializer()) 
 
     # Pick out the model input and output
-    src_tensor = sess.graph.get_tensor_by_name('src:0')
-    tar_tensor = sess.graph.get_tensor_by_name('tar:0')
+    #src_tensor = sess.graph.get_tensor_by_name('src:0')
+    #tar_tensor = sess.graph.get_tensor_by_name('tar:0')
     #result_tensor = sess.graph.get_tensor_by_name('result:0')
 
-    src_info = build_tensor_info(src_tensor)
-    tar_info = build_tensor_info(tar_tensor)
-    result_info = build_tensor_info(result)
+    #src_info = build_tensor_info(src_tensor)
+    #tar_info = build_tensor_info(tar_tensor)
+    #result_info = build_tensor_info(result)
 
     # Create a signature definition for tfserving
-    signature_definition = signature_def_utils.build_signature_def(
-        inputs={'src': src_info, 'tar': tar_info},
-        outputs={'result': result_info},
-        method_name=tf.saved_model.signature_constants.PREDICT_METHOD_NAME)
+    #signature_definition = signature_def_utils.build_signature_def(
+    #    inputs={'src': src_info, 'tar': tar_info},
+    #    outputs={'result': result_info},
+    #    method_name=tf.saved_model.signature_constants.PREDICT_METHOD_NAME)
 
-    builder = saved_model_builder.SavedModelBuilder('face_translation_model')
+    #builder = saved_model_builder.SavedModelBuilder('face_translation_model')
 
-    builder.add_meta_graph_and_variables(
-        sess, [tag_constants.SERVING],
-        signature_def_map={
-            signature_constants.DEFAULT_SERVING_SIGNATURE_DEF_KEY:
-                signature_definition
-        })
+    #builder.add_meta_graph_and_variables(
+    #    sess, [tag_constants.SERVING],
+    #    signature_def_map={
+    #        signature_constants.DEFAULT_SERVING_SIGNATURE_DEF_KEY:
+    #            signature_definition
+    #    })
 
-    # Save the model so we can serve it with a model server :)
-    builder.save()
+    # Save the model so we can serve it with a model server
+    #builder.save()
