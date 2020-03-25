@@ -51,15 +51,15 @@ def face_translation(src_in, tar_in):
 
     return result_face_final
 
-with tf.Graph().as_default():
-    g = tf.Graph();
+#with tf.Graph().as_default():
+#    g = tf.Graph();
   
-    with tf.Session(graph=g) as sess:
+#    with tf.Session(graph=g) as sess:
         
-            to_export = tf.Module()
-            to_export.face_translation = face_translation
+to_export = tf.Module()
+to_export.face_translation = face_translation
 
-            tf.saved_model.save(to_export, "face_translation_model")
+tf.saved_model.save(to_export, "face_translation_model")
 
     #final_result = face_translation(src_input, tar_input)
     #result = tf.Variable(final_result)
